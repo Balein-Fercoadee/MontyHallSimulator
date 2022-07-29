@@ -2,6 +2,8 @@
 
 A simple, console application that simulates the Monty Hall Problem.
 
+Read more about the Monty Hall Problem on [Wikipedia](https://en.wikipedia.org/wiki/Monty_Hall_problem).
+
 ## Required Software
 
 * .NET 6.0 (Windows/MacOS/Linux)
