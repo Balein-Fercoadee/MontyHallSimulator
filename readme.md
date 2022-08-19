@@ -6,9 +6,15 @@ Read more about the Monty Hall Problem on [Wikipedia](https://en.wikipedia.org/w
 
 ## Required Software
 
-* .NET 6.0 (Windows/MacOS/Linux)
+* .NET 6.0 SDK (Windows/MacOS/Linux)
 
-.NET 6.0 can be downloaded from [.NET @ Microsoft](https://dotnet.microsoft.com/en-us/download).
+### Windows/MacOS
+.NET 6.0 SDK can be downloaded from [.NET @ Microsoft](https://dotnet.microsoft.com/en-us/download).
+
+### Linux
+.NET 6.0 SDK can be installed using APT:
+
+`sudo apt install dotnet-sdk-6.0`
 
 ## Building
 
@@ -16,13 +22,24 @@ Read more about the Monty Hall Problem on [Wikipedia](https://en.wikipedia.org/w
 
 Open the solution in Visual Studio and select `Build -> Build Solution`.
 
-### Using the command line interface (Linux/Windows)
+### Using the command line interface (Windows/MacOS/Linux)
 
 Run the following command within the solution directory:
 
 `dotnet build MontyHallSimulator.sln`
 
-Note: Using either build method, any required NuGet packages will be downloaded and installed.
+Note: Using either build method, NuGet packages will be downloaded and installed for the project.
 
+## Running
 
-More documentation to come.
+To use the default number of trials:
+
+`./MontyHallSimulator`
+
+To supply the number of trials:
+
+`./MontyHallSimulator <numberOfTrials>`
+
+`./MontyHallSimulator 1000000`
+
+##More documentation to come.

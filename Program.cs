@@ -11,6 +11,8 @@ namespace MontyHallProblemCoreConsole
         {
             int numberOfTrials = 0;
 
+            PrintHeader();
+
             if (args.Length == 0)
             {
                 PrintHelp();
@@ -19,9 +21,11 @@ namespace MontyHallProblemCoreConsole
             else
             {
                 bool gotIt = int.TryParse(args[0], out numberOfTrials);
+                gotIt &= (numberOfTrials > 0) ? true : false;
 
                 if (!gotIt)
                 {
+                    PrintError("Invalid number of trials.");
                     PrintHelp();
                     Environment.Exit(1);
                 }
@@ -31,15 +35,60 @@ namespace MontyHallProblemCoreConsole
         }
 
         /// <summary>
+        /// Tests if a number is valid for use as number of trials.
+        /// Method tests that the number is positive
+        /// </summary>
+        /// <param name="numberOfTrials">Integer to test.</param>
+        /// <returns></returns>
+        private static bool IsValidNumber(int numberOfTrials)
+        {
+            bool isValid = true;
+
+
+            return isValid;
+        }
+        /// <summary>
         /// Prints the simulator's usage to the default console.
         /// </summary>
         private static void PrintHelp()
         {
+            Console.WriteLine();
             Console.WriteLine("usage: MontyHallSimulator <number of trials>");
             Console.WriteLine();
             Console.WriteLine("  number of trials: The number of trials the simulator will run.");
             Console.WriteLine("                    The largest value accepted is 2147483647 (max value of int32).");
             Console.WriteLine("                    The default value is 100000.");
+        }
+
+        private static void PrintHeader()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 50));
+            Console.WriteLine("Monty Hall Simulator v1.0");
+            Console.WriteLine(new string('=', 50));
+            Console.ResetColor();
+        }
+
+        private static void PrintTrailer(DateTime startTime, DateTime endTime, long playerWinsStayingPat, long playerWinsDueToSwitch, int numberOfTrials)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Simulation Results");
+            Console.WriteLine(new string('=', 50));
+            Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds}s");
+            Console.WriteLine();
+            Console.WriteLine("Player Stays with First Door Choice");
+            Console.WriteLine($"  Wins: {playerWinsStayingPat,14:N0}; Ratio W/T: {(playerWinsStayingPat) / (decimal)numberOfTrials:P5}");
+            Console.WriteLine("Player Switches Doors After Host Shows Goat Door");
+            Console.WriteLine($"  Wins: {playerWinsDueToSwitch,14:N0}; Ratio W/T: {(playerWinsDueToSwitch) / (decimal)numberOfTrials:P5}");
+            Console.WriteLine();
+        }
+
+        private static void PrintError(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"ERROR - {message}");
+            Console.ResetColor();
         }
 
         private static void RunSimulation(int numberOfTrials)
@@ -50,13 +99,8 @@ namespace MontyHallProblemCoreConsole
             long playerWinsDueToSwitch = 0;
             long playerWinsStayingPat = 0;
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(new string('=', 50));
-            Console.WriteLine("Monty Hall Simulator v1.0");
-            Console.WriteLine(new string('=', 50));
-            Console.ResetColor();
             Console.WriteLine();
-            Console.Write($"Starting simulation with {numberOfTrials:N0}...");
+            Console.Write($"Starting simulation with {numberOfTrials:N0} trials...");
 
             DateTime startTime = DateTime.UtcNow;
 
@@ -98,15 +142,8 @@ namespace MontyHallProblemCoreConsole
             DateTime endTime = DateTime.UtcNow;
 
             Console.WriteLine(" complete.");
-            Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds}s");
-            Console.WriteLine();
-            Console.WriteLine("Simulation Results");
-            Console.WriteLine(new string('=', 50));
-            Console.WriteLine("Player Stays with First Door Choice");
-            Console.WriteLine($"  Wins: {playerWinsStayingPat,14:N0}; Ratio W/T: {(playerWinsStayingPat) / (decimal)numberOfTrials:P5}");
-            Console.WriteLine("Player Switches Doors After Host Shows Goat Door");
-            Console.WriteLine($"  Wins: {playerWinsDueToSwitch,14:N0}; Ratio W/T: {(playerWinsDueToSwitch) / (decimal)numberOfTrials:P5}");
-            Console.WriteLine();
+
+            PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsDueToSwitch, numberOfTrials);
         }
 
         public enum Prizes
