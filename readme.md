@@ -32,14 +32,21 @@ Note: Using either build method, NuGet packages will be downloaded and installed
 
 ## Running
 
-To use the default number of trials:
+To use the default number of trials and threads:
 
-`./MontyHallSimulator`
+`./MontyHallSimulator` will execute 100,000 trials on one thread.
 
 To supply the number of trials:
 
 `./MontyHallSimulator <numberOfTrials>`
 
-`./MontyHallSimulator 1000000`
+`./MontyHallSimulator 1000000` will execute 1,000,000 trials on one thread.
 
-##More documentation to come.
+To supply the number of trials and threads:
+
+`./MontyHallSimulator <numberOfTrials> <numberOfThreads>`
+
+`./MontyHallSimulator 10000000 6` will execute 10,000,000 trials on six threads.
+
+
+## More documentation to come.

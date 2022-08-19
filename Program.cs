@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,9 +9,15 @@ namespace MontyHallProblemCoreConsole
 {
     class Program
     {
+        [ThreadStatic]
+        private static Random __random;
+
+        public static Random Random => __random ?? (__random = new Random((int)((1 + Thread.CurrentThread.ManagedThreadId) * DateTime.UtcNow.Ticks)));
+
         static void Main(string[] args)
         {
             int numberOfTrials = 0;
+            int numberOfTreads = 1;
 
             PrintHeader();
 
@@ -18,7 +26,7 @@ namespace MontyHallProblemCoreConsole
                 PrintHelp();
                 Console.WriteLine();
             }
-            else
+            else // User has supplied the number of trials.
             {
                 bool gotIt = int.TryParse(args[0], out numberOfTrials);
                 gotIt &= (numberOfTrials > 0) ? true : false;
@@ -31,33 +39,40 @@ namespace MontyHallProblemCoreConsole
                 }
             }
 
-            RunSimulation(numberOfTrials);
+            if (args.Length == 2)
+            {
+                bool gotIt = int.TryParse(args[1], out numberOfTreads);
+                gotIt &= (numberOfTreads > 0) ? true : false;
+
+                if (gotIt)
+                {
+                    numberOfTreads = Math.Min(Environment.ProcessorCount / 2, numberOfTreads);
+                }
+                else
+                {
+                    PrintError("Invalid number of threads.");
+                    PrintHelp();
+                    Environment.Exit(1);
+                }
+            }
+
+            RunSimulation(numberOfTrials, numberOfTreads);
         }
 
-        /// <summary>
-        /// Tests if a number is valid for use as number of trials.
-        /// Method tests that the number is positive
-        /// </summary>
-        /// <param name="numberOfTrials">Integer to test.</param>
-        /// <returns></returns>
-        private static bool IsValidNumber(int numberOfTrials)
-        {
-            bool isValid = true;
-
-
-            return isValid;
-        }
         /// <summary>
         /// Prints the simulator's usage to the default console.
         /// </summary>
         private static void PrintHelp()
         {
             Console.WriteLine();
-            Console.WriteLine("usage: MontyHallSimulator <number of trials>");
+            Console.WriteLine("usage: MontyHallSimulator <number of trials> <number of threads>");
             Console.WriteLine();
-            Console.WriteLine("  number of trials: The number of trials the simulator will run.");
+            Console.WriteLine("  number of trials  The number of trials the simulator will run.");
             Console.WriteLine("                    The largest value accepted is 2147483647 (max value of int32).");
             Console.WriteLine("                    The default value is 100000.");
+            Console.WriteLine("  number of threads The number of threads the simulater will use.");
+            Console.WriteLine("                    The largest value accepted is the half current number of cores, rounded down.");
+            Console.WriteLine("                    The default value is 1.");
         }
 
         private static void PrintHeader()
@@ -91,7 +106,7 @@ namespace MontyHallProblemCoreConsole
             Console.ResetColor();
         }
 
-        private static void RunSimulation(int numberOfTrials)
+        private static void RunSimulation(int numberOfTrials, int numberOfTreads)
         {
             if (numberOfTrials == 0)
                 numberOfTrials = 100000;
@@ -99,49 +114,58 @@ namespace MontyHallProblemCoreConsole
             long playerWinsDueToSwitch = 0;
             long playerWinsStayingPat = 0;
 
+            ConcurrentBag<int> playerStays = new ConcurrentBag<int>();
+            ConcurrentBag<int> playerSwitches = new ConcurrentBag<int>();
+
+            string plural = numberOfTreads>1?"s" : string.Empty;
+
             Console.WriteLine();
-            Console.Write($"Starting simulation with {numberOfTrials:N0} trials...");
+            Console.Write($"Starting simulation with {numberOfTrials:N0} trials, on {numberOfTreads} thread{plural}... ");
 
             DateTime startTime = DateTime.UtcNow;
 
-            Random random = new Random();
-            for (long counter = 0; counter < numberOfTrials; counter++)
+            Parallel.For(0, numberOfTrials, new ParallelOptions() { MaxDegreeOfParallelism = numberOfTreads }, i =>
             {
                 // Create the 3 doors and initialize with goats
                 List<Prizes> doors = new List<Prizes>() { Prizes.Goat, Prizes.Goat, Prizes.Goat };
                 // Pick a door to put the car behind.
-                int doorWithCar = random.Next(3);
+                int doorWithCar = Random.Next(3);
                 doors[doorWithCar] = Prizes.Car;
 
                 // Have the player chose a door
-                int playerDoorChoice = random.Next(3);
+                int playerDoorChoice = Random.Next(3);
 
                 int shownDoor;
                 // The host shows a door which has a goat and is not the player's door.
                 do
                 {
-                    shownDoor = random.Next(3);
+                    shownDoor = Random.Next(3);
                 } while (doors[shownDoor] == Prizes.Car | shownDoor == playerDoorChoice);
 
                 // if the car is behind the player's initial door then they win!
-                playerWinsStayingPat += playerDoorChoice == doorWithCar ? 1 : 0;
+                playerStays.Add(playerDoorChoice == doorWithCar ? 1 : 0);
 
                 int newPlayerDoorChoice;
                 // Now have player switch their choice
                 // Make sure they don't chose the shown door or the door they already picked
                 do
                 {
-                    newPlayerDoorChoice = random.Next(3);
+                    newPlayerDoorChoice = Random.Next(3);
                 } while (newPlayerDoorChoice == playerDoorChoice | newPlayerDoorChoice == shownDoor);
 
                 // if the car is behind the player's second door then they win!
-                playerWinsDueToSwitch += newPlayerDoorChoice == doorWithCar ? 1 : 0;
-            }
+                playerSwitches.Add(newPlayerDoorChoice == doorWithCar ? 1 : 0);
+            });
 
 
             DateTime endTime = DateTime.UtcNow;
 
-            Console.WriteLine(" complete.");
+            Console.WriteLine("complete.");
+
+            Console.Write("Compiling results... ");
+            playerWinsStayingPat = playerStays.Sum();
+            playerWinsDueToSwitch = playerSwitches.Sum();
+            Console.WriteLine("complete.");
 
             PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsDueToSwitch, numberOfTrials);
         }
