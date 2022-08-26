@@ -12,7 +12,11 @@ namespace MontyHallProblemCoreConsole
         [ThreadStatic]
         private static Random __random;
 
-        public static Random Random => __random ?? (__random = new Random((int)((1 + Thread.CurrentThread.ManagedThreadId) * DateTime.UtcNow.Ticks)));
+        /// <summary>
+        /// Gets an instance of <c>Random</c>.
+        /// If this is the first call to the property for the thread, a new instance is created and returned. Otherwise, the thread's existing instance is returned.
+        /// </summary>
+        private static Random Random => __random ?? (__random = new Random((int)((1 + Thread.CurrentThread.ManagedThreadId) * DateTime.UtcNow.Ticks)));
 
         static void Main(string[] args)
         {
