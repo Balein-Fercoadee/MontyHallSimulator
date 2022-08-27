@@ -44,7 +44,7 @@ namespace MontyHallSimulator
                     if (!gotIt)
                         badTrials = true;
 
-                    gotIt = int.TryParse(args[1], out numberOfTreads);
+                    gotIt &= int.TryParse(args[1], out numberOfTreads);
                     gotIt &= (numberOfTreads > 0);
 
                     if (gotIt)
