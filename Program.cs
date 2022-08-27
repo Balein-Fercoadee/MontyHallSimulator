@@ -52,11 +52,12 @@ namespace MontyHallSimulator
             Console.WriteLine();
             Console.WriteLine("usage: MontyHallSimulator <number of trials> <number of threads>");
             Console.WriteLine();
-            Console.WriteLine("  number of trials  The number of trials the simulator will run.");
+            Console.WriteLine("number of trials -  The number of trials the simulator will run.");
             Console.WriteLine("                    The largest value accepted is 2147483647 (max value of int32).");
             Console.WriteLine("                    The default value is 100000.");
-            Console.WriteLine("  number of threads The number of threads the simulater will use.");
-            Console.WriteLine("                    The largest value accepted is the half current number of cores, rounded down.");
+            Console.WriteLine("                    WARNING - running the max, or near max, number of trials may result in an out-of-memory exception.");
+            Console.WriteLine("number of threads - The number of threads the simulater will use.");
+            Console.WriteLine("                    The largest value accepted is half the available number of cores, rounded down.");
             Console.WriteLine("                    The default value is 1.");
         }
 
@@ -77,7 +78,7 @@ namespace MontyHallSimulator
             Console.WriteLine();
             Console.WriteLine("Simulation Results");
             Console.WriteLine(new string('=', 50));
-            Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds}s");
+            Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds:F3}s");
             Console.WriteLine();
             Console.WriteLine("Stay with First Door Choice");
             Console.WriteLine($"  Wins: {playerWinsStayingPat,14:N0}; Ratio W/T: {(playerWinsStayingPat) / (decimal)numberOfTrials:P5}");
@@ -130,7 +131,8 @@ namespace MontyHallSimulator
                 } while (doors[shownDoor] == Prizes.Car | shownDoor == playerDoorChoice);
 
                 // if the car is behind the player's initial door then they win!
-                playerStays.Add(playerDoorChoice == doorWithCar ? 1 : 0);
+                if (playerDoorChoice == doorWithCar)
+                    playerStays.Add(1);
 
                 int newPlayerDoorChoice;
                 // Now have player switch their choice
@@ -141,7 +143,8 @@ namespace MontyHallSimulator
                 } while (newPlayerDoorChoice == playerDoorChoice | newPlayerDoorChoice == shownDoor);
 
                 // if the car is behind the player's second door then they win!
-                playerSwitches.Add(newPlayerDoorChoice == doorWithCar ? 1 : 0);
+                if (newPlayerDoorChoice == doorWithCar)
+                    playerSwitches.Add(1);
             });
 
 
