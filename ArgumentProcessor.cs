@@ -16,32 +16,50 @@ namespace MontyHallSimulator
             bool badThreads = false;
 
             ParseResults results = new ParseResults();
-            
-            if (args.Length == 0)
-            {
-                results = new ParseResults(true, numberOfTrials, numberOfTreads);
-            }
-            else // User has supplied the number of trials.
-            {
-                bool gotIt = int.TryParse(args[0], out numberOfTrials);
-                gotIt &= (numberOfTrials > 0) ? true : false;
 
-                if (!gotIt)
-                {
-                    badTrials = true;
-                }
-            }
+            bool gotIt = false;
 
-            if (args.Length == 2)
+            switch (args.Length)
             {
-                bool gotIt = int.TryParse(args[1], out numberOfTreads);
-                gotIt &= (numberOfTreads > 0) ? true : false;
+                case 0: // nothing was provided, use the default values
+                    results = new ParseResults(0, numberOfTrials, numberOfTreads);
+                    break;
 
-                if (gotIt)
-                {
-                    numberOfTreads = Math.Min(Environment.ProcessorCount / 2, numberOfTreads);
-                    results = new ParseResults(numberOfTrials, numberOfTreads);
-                }
+                case 1: // one value was provided, assume it's number of trials
+                    gotIt = int.TryParse(args[0], out numberOfTrials);
+                    gotIt &= (numberOfTrials > 0);
+
+                    if (gotIt)
+                    {
+                        results = new ParseResults(1, numberOfTrials, numberOfTreads);
+                    }
+                    else
+                        badTrials = true;
+                    break;
+
+                case 2: // both number of trials and threads was provided
+                    gotIt = int.TryParse(args[0], out numberOfTrials);
+                    gotIt &= (numberOfTrials > 0);
+
+                    if (!gotIt)
+                        badTrials = true;
+
+                    gotIt = int.TryParse(args[1], out numberOfTreads);
+                    gotIt &= (numberOfTreads > 0);
+
+                    if (gotIt)
+                    {
+                        numberOfTreads = Math.Min(Environment.ProcessorCount / 2, numberOfTreads);
+                        results = new ParseResults(2, numberOfTrials, numberOfTreads);
+                    }
+                    else
+                        badThreads = true;
+
+                    break;
+
+                default: // too many arguments sent
+                    results = new ParseResults();
+                    break;
             }
 
             return results;
@@ -51,7 +69,7 @@ namespace MontyHallSimulator
     internal class ParseResults
     {
         /// <summary>
-        /// Gets if the incoming arugments where successfully parsed.
+        /// Gets whether the incoming arugments where successfully parsed.
         /// </summary>
         public bool ValidArguments
         {
@@ -71,29 +89,24 @@ namespace MontyHallSimulator
             get { return !NumberOfThreads.HasValue; }
         }
 
-        public bool UsedDefaultValues { get; private set; }
-
         public int? NumberOfTrials { get; private set; }
 
         public int? NumberOfThreads { get; private set; }
+
+        public int NumberOfArguments { get; private set; }
 
         /// <summary>
         /// The default constructor.
         /// </summary>
         public ParseResults()
         {
-            UsedDefaultValues = false;
         }
 
-        public ParseResults(int? numberOfTrials, int? numberOfThreads) :this()
+        public ParseResults(int numberOfArguments, int? numberOfTrials, int? numberOfThreads) : this()
         {
+            NumberOfArguments = numberOfArguments;
             NumberOfTrials = numberOfTrials;
             NumberOfThreads = numberOfThreads;
-        }
-
-        public ParseResults(bool usedDefaultValues, int? numberOfTrials, int? numberOfThreads) : this(numberOfTrials, numberOfThreads)
-        {
-            UsedDefaultValues = usedDefaultValues;
         }
     }
 }
