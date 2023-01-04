@@ -59,7 +59,7 @@ namespace MontyHallSimulator
             Console.WriteLine("number of trials -  The number of trials the simulator will run.");
             Console.WriteLine("                    The largest value accepted is 2147483647 (max value of int32).");
             Console.WriteLine("                    The default value is 100000.");
-            Console.WriteLine("                    WARNING - running the max, or near max, number of trials may result in an out-of-memory exception.");
+            Console.WriteLine("                    WARNING - Running the max, or near max, number of trials may result in an out-of-memory exception.");
             Console.WriteLine("number of threads - The number of threads the simulater will use.");
             Console.WriteLine("                    The largest value accepted is half the available number of cores, rounded down.");
             Console.WriteLine("                    The default value is 1.");
@@ -103,16 +103,17 @@ namespace MontyHallSimulator
             if (numberOfTrials == 0)
                 numberOfTrials = 100000;
 
-            long playerWinsDueToSwitch = 0;
+            long playerWinsSwitching = 0;
             long playerWinsStayingPat = 0;
 
             ConcurrentBag<int> playerStays = new ConcurrentBag<int>();
             ConcurrentBag<int> playerSwitches = new ConcurrentBag<int>();
 
-            string plural = numberOfTreads > 1 ? "s" : string.Empty;
+            string pluralTrials = numberOfTrials > 1 ? "s" : string.Empty;
+            string pluralThreads = numberOfTreads > 1 ? "s" : string.Empty;
 
             Console.WriteLine();
-            Console.Write($"Starting simulation with {numberOfTrials:N0} trials, on {numberOfTreads} thread{plural}... ");
+            Console.Write($"Starting simulation with {numberOfTrials:N0} trial{pluralTrials}, on {numberOfTreads} thread{pluralThreads}... ");
 
             DateTime startTime = DateTime.UtcNow;
 
@@ -158,10 +159,10 @@ namespace MontyHallSimulator
 
             Console.Write("Compiling results... ");
             playerWinsStayingPat = playerStays.Sum();
-            playerWinsDueToSwitch = playerSwitches.Sum();
+            playerWinsSwitching = playerSwitches.Sum();
             Console.WriteLine("complete.");
 
-            PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsDueToSwitch, numberOfTrials);
+            PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsSwitching, numberOfTrials);
         }
 
         public enum Prizes
