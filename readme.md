@@ -26,7 +26,9 @@ Open the solution in Visual Studio and select `Build -> Build Solution`.
 
 Run the following command within the solution directory:
 
-`dotnet build MontyHallSimulator.sln`
+```bash
+dotnet build MontyHallSimulator.sln
+```
 
 Note: Using either build method, NuGet packages will be downloaded and installed for the project.
 
