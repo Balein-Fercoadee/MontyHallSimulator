@@ -14,7 +14,9 @@ Read more about the Monty Hall Problem on [Wikipedia](https://en.wikipedia.org/w
 ### Linux
 .NET 6.0 SDK can be installed using APT:
 
-`sudo apt install dotnet-sdk-6.0`
+```bash
+sudo apt install dotnet-sdk-6.0
+```
 
 ## Building
 
@@ -36,7 +38,9 @@ Note: Using either build method, NuGet packages will be downloaded and installed
 
 To use the default number of trials and threads:
 
-`./MontyHallSimulator`
+```bash
+./MontyHallSimulator
+```
 
 This will execute the simulator 100,000 trials on one thread.
 
