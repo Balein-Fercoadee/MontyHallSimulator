@@ -21,8 +21,8 @@ namespace MontyHallSimulator
 
         static void Main(string[] args)
         {
-            int numberOfTrials = 100000;
-            int numberOfThreads = 1;
+            int numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
+            int numberOfThreads = Constants.DEFAULT_THREAD_COUNT;
 
             PrintHeader();
 
@@ -57,12 +57,12 @@ namespace MontyHallSimulator
             Console.WriteLine("usage: MontyHallSimulator <number of trials> <number of threads>");
             Console.WriteLine();
             Console.WriteLine("number of trials -  The number of trials the simulator will run.");
-            Console.WriteLine("                    The largest value accepted is 2147483647 (max value of int32).");
-            Console.WriteLine("                    The default value is 100000.");
+            Console.WriteLine($"                    The largest value accepted is {Constants.MAX_TRIAL_COUNT}.");
+            Console.WriteLine($"                    The default value is {Constants.DEFAULT_TRIAL_COUNT}.");
             Console.WriteLine("                    WARNING - Running the max, or near max, number of trials may result in an out-of-memory exception.");
             Console.WriteLine("number of threads - The number of threads the simulater will use.");
             Console.WriteLine("                    The largest value accepted is half the available number of cores, rounded down.");
-            Console.WriteLine("                    The default value is 1.");
+            Console.WriteLine($"                    The default value is {Constants.DEFAULT_THREAD_COUNT}.");
         }
 
         private static void PrintHeader()
@@ -101,7 +101,7 @@ namespace MontyHallSimulator
         private static void RunSimulation(int numberOfTrials, int numberOfTreads)
         {
             if (numberOfTrials == 0)
-                numberOfTrials = 100000;
+                numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
 
             long playerWinsSwitching = 0;
             long playerWinsStayingPat = 0;
