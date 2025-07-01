@@ -14,7 +14,7 @@ namespace MontyHallSimulator
         private static Random __random;
 
         /// <summary>
-        /// Gets an instance of <c>Random</c>.
+        /// Gets an instance of <c>Random</c>. This property will be unique per thread.
         /// If this is the first call to the property for the thread, a new instance is created and returned. Otherwise, the thread's existing instance is returned.
         /// </summary>
         private static Random Random => __random ?? (__random = new Random((int)((1 + Thread.CurrentThread.ManagedThreadId) * DateTime.UtcNow.Ticks)));
@@ -108,7 +108,7 @@ namespace MontyHallSimulator
 
             ConcurrentBag<int> playerStays = new ConcurrentBag<int>();
             ConcurrentBag<int> playerSwitches = new ConcurrentBag<int>();
-
+            
             string pluralTrials = numberOfTrials > 1 ? "s" : string.Empty;
             string pluralThreads = numberOfTreads > 1 ? "s" : string.Empty;
 
@@ -119,39 +119,14 @@ namespace MontyHallSimulator
 
             Parallel.For(0, numberOfTrials, new ParallelOptions() { MaxDegreeOfParallelism = numberOfTreads }, i =>
             {
-                // Create the 3 doors and initialize with goats
-                List<Prizes> doors = new List<Prizes>() { Prizes.Goat, Prizes.Goat, Prizes.Goat };
-                // Pick a door to put the car behind.
-                int doorWithCar = Random.Next(3);
-                doors[doorWithCar] = Prizes.Car;
+                RoundOutcome outcome = RunSingleRound(Random);
 
-                // Have the player chose a door
-                int playerDoorChoice = Random.Next(3);
-
-                int shownDoor;
-                // The host shows a door which has a goat and is not the player's door.
-                do
-                {
-                    shownDoor = Random.Next(3);
-                } while (doors[shownDoor] == Prizes.Car | shownDoor == playerDoorChoice);
-
-                // if the car is behind the player's initial door then they win!
-                if (playerDoorChoice == doorWithCar)
+                if (outcome.WinWithStay)
                     playerStays.Add(1);
 
-                int newPlayerDoorChoice;
-                // Now have player switch their choice
-                // Make sure they don't chose the shown door or the door they already picked
-                do
-                {
-                    newPlayerDoorChoice = Random.Next(3);
-                } while (newPlayerDoorChoice == playerDoorChoice | newPlayerDoorChoice == shownDoor);
-
-                // if the car is behind the player's second door then they win!
-                if (newPlayerDoorChoice == doorWithCar)
+                if (outcome.WinWithSwitch)
                     playerSwitches.Add(1);
             });
-
 
             DateTime endTime = DateTime.UtcNow;
 
@@ -165,10 +140,66 @@ namespace MontyHallSimulator
             PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsSwitching, numberOfTrials);
         }
 
+        /// <summary>
+        /// Generate a single simulation of a Monty Hall round.
+        /// </summary>
+        /// <param name="rng">An instance of <c>Random</c>.</param>
+        public static RoundOutcome RunSingleRound(Random rng)
+        {
+            RoundOutcome roundOutcome = new RoundOutcome();
+
+            // Create the 3 doors and initialize with goats
+            List<Prizes> doors = new List<Prizes>() { Prizes.Goat, Prizes.Goat, Prizes.Goat };
+            // Pick a door to put the car behind.
+            int doorWithCar = rng.Next(3);
+            doors[doorWithCar] = Prizes.Car;
+
+            // Have the player chose a door
+            int playerDoorChoice = rng.Next(3);
+
+            int shownDoor;
+            // The host shows a door which has a goat and is not the player's door.
+            do
+            {
+                shownDoor = rng.Next(3);
+            } while (doors[shownDoor] == Prizes.Car | shownDoor == playerDoorChoice);
+
+            // if the car is behind the player's initial door then they win!
+            if (playerDoorChoice == doorWithCar)
+                roundOutcome.WinWithStay = true;
+
+            int newPlayerDoorChoice;
+            // Now have player switch their choice
+            // Make sure they don't chose the shown door or the door they already picked
+            do
+            {
+                newPlayerDoorChoice = rng.Next(3);
+            } while (newPlayerDoorChoice == playerDoorChoice | newPlayerDoorChoice == shownDoor);
+
+            // if the car is behind the player's second door then they win!
+            if (newPlayerDoorChoice == doorWithCar)
+                roundOutcome.WinWithSwitch = true;
+
+            return roundOutcome;
+        }
+
         public enum Prizes
         {
             Car = 1,
             Goat = 0
+        }
+
+        public struct RoundOutcome
+        {
+            /// <summary>
+            /// Player won by staying pat.
+            /// </summary>
+            public bool WinWithStay;
+
+            /// <summary>
+            /// Player won by switching.
+            /// </summary>
+            public bool WinWithSwitch;
         }
     }
 }
