@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MontyHallSimulator
 {
@@ -39,16 +36,17 @@ namespace MontyHallSimulator
 
                 case 2: // both number of trials and threads was provided
                     gotIt = int.TryParse(args[0], out numberOfTrials);
-                    gotIt &= (numberOfTrials > 0);
+                    gotIt &= numberOfTrials > 0;
 
                     if (!gotIt)
                         badTrials = true;
 
                     gotIt &= int.TryParse(args[1], out numberOfTreads);
-                    gotIt &= (numberOfTreads > 0);
+                    gotIt &= numberOfTreads > 0;
 
                     if (gotIt)
                     {
+                        // Simulations will use up to half of available cores.
                         numberOfTreads = Math.Min(Environment.ProcessorCount / 2, numberOfTreads);
                         results = new ParseResults(2, numberOfTrials, numberOfTreads);
                     }
@@ -102,6 +100,12 @@ namespace MontyHallSimulator
         {
         }
 
+        /// <summary>
+        /// Contructor that fully initializes <c>ParseResults</c>
+        /// </summary>
+        /// <param name="numberOfArguments">The number of arguements being stored.</param>
+        /// <param name="numberOfTrials">The number of trials to run.</param>
+        /// <param name="numberOfThreads">The number of threads that will run the trials.</param>
         public ParseResults(int numberOfArguments, int? numberOfTrials, int? numberOfThreads) : this()
         {
             NumberOfArguments = numberOfArguments;
