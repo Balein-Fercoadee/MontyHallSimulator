@@ -119,7 +119,7 @@ namespace MontyHallSimulator
 
             Parallel.For(0, numberOfTrials, new ParallelOptions() { MaxDegreeOfParallelism = numberOfTreads }, i =>
             {
-                RoundOutcome outcome = RunSingleRound(Random);
+                SimulationOutcome outcome = RunSingleRound(Random);
 
                 if (outcome.WinWithStay)
                     playerStays.Add(1);
@@ -144,9 +144,9 @@ namespace MontyHallSimulator
         /// Generate a single simulation of a Monty Hall round.
         /// </summary>
         /// <param name="rng">An instance of <c>Random</c>.</param>
-        public static RoundOutcome RunSingleRound(Random rng)
+        public static SimulationOutcome RunSingleRound(Random rng)
         {
-            RoundOutcome roundOutcome = new RoundOutcome();
+            SimulationOutcome roundOutcome = new SimulationOutcome();
 
             // Create the 3 doors and initialize with goats
             List<Prizes> doors = new List<Prizes>() { Prizes.Goat, Prizes.Goat, Prizes.Goat };
@@ -181,25 +181,6 @@ namespace MontyHallSimulator
                 roundOutcome.WinWithSwitch = true;
 
             return roundOutcome;
-        }
-
-        public enum Prizes
-        {
-            Car = 1,
-            Goat = 0
-        }
-
-        public struct RoundOutcome
-        {
-            /// <summary>
-            /// Player won by staying pat.
-            /// </summary>
-            public bool WinWithStay;
-
-            /// <summary>
-            /// Player won by switching.
-            /// </summary>
-            public bool WinWithSwitch;
         }
     }
 }
