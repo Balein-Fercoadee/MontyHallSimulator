@@ -9,8 +9,6 @@ namespace MontyHallSimulator
         {
             int numberOfTrials = defaultTrials;
             int numberOfTreads = defaultThreads;
-            bool badTrials = false;
-            bool badThreads = false;
 
             ParseResults results = new ParseResults();
 
@@ -30,16 +28,12 @@ namespace MontyHallSimulator
                     {
                         results = new ParseResults(1, numberOfTrials, numberOfTreads);
                     }
-                    else
-                        badTrials = true;
+
                     break;
 
                 case 2: // both number of trials and threads was provided
                     gotIt = int.TryParse(args[0], out numberOfTrials);
                     gotIt &= numberOfTrials > 0;
-
-                    if (!gotIt)
-                        badTrials = true;
 
                     gotIt &= int.TryParse(args[1], out numberOfTreads);
                     gotIt &= numberOfTreads > 0;
@@ -50,8 +44,6 @@ namespace MontyHallSimulator
                         numberOfTreads = Math.Min(Environment.ProcessorCount / 2, numberOfTreads);
                         results = new ParseResults(2, numberOfTrials, numberOfTreads);
                     }
-                    else
-                        badThreads = true;
 
                     break;
 

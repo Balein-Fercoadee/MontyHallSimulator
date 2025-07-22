@@ -2,6 +2,9 @@ using System;
 
 namespace MontyHallSimulator;
 
+/// <summary>
+/// Class that contains global constants.
+/// </summary>
 public static class Constants
 {
     /// <summary>

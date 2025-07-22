@@ -3,10 +3,16 @@ using System.Collections.Generic;
 
 namespace MontyHallSimulator;
 
+/// <summary>
+/// Class that contains the logic to run a Monty Hall Simulation.
+/// </summary>
 public class Simulator
 {
     private Random _random;
 
+    /// <summary>
+    /// Default Constructor. Initializes the RNG used during the simulation.
+    /// </summary>
     public Simulator()
     {
         _random = new Random((int)((1 + Environment.CurrentManagedThreadId) * DateTime.UtcNow.Ticks));
@@ -96,6 +102,9 @@ public struct SimulationOutcome
     /// </summary>
     public bool WinWithSwitch;
 
+    /// <summary>
+    /// Default constructor. Initializes fields to <c>false</c>.
+    /// </summary>
     public SimulationOutcome()
     {
         WinWithStay = false;
