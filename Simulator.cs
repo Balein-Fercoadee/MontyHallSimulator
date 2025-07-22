@@ -12,6 +12,10 @@ public class Simulator
         _random = new Random((int)((1 + Environment.CurrentManagedThreadId) * DateTime.UtcNow.Ticks));
     }
 
+    /// <summary>
+    /// Runs a single Monty Hall simulation. It will run both 'Stay Pat' and 'Switch Door' strategies.
+    /// </summary>
+    /// <returns></returns>
     public SimulationOutcome RunSingleSimulation()
     {
         Random rng = _random;
@@ -71,6 +75,14 @@ public enum Prizes
 
 /// <summary>
 /// Stores the results of a Monty Hall simulation.
+/// <para>
+/// The possible outcomes:
+/// <list type="bullet">
+/// <item><c>WinWithStay</c> is true.</item>
+/// <item><c>WinWithSwitch</c> is true.</item>
+/// <item><c>WinWithStay</c> and <c>WinWithSwitch</c> are both false.</item>
+/// </list>
+/// </para>
 /// </summary>
 public struct SimulationOutcome
 {
