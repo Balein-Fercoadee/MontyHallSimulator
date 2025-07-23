@@ -10,7 +10,7 @@ Run the program, take a look at the code and be prepared to have your intuition 
 
 ## Required Software
 
-* .NET 8.0 or 9.0 SDK (Windows/MacOS/Linux)
+* .NET 9.0 SDK (Windows/MacOS/Linux)
 
 ### Windows/MacOS
 .NET 9.0 SDK can be downloaded from [.NET @ Microsoft](https://dotnet.microsoft.com/en-us/download).
