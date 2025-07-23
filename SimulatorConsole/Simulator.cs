@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 
-namespace MontyHallSimulator;
+namespace SimulatorConsole;
 
 /// <summary>
 /// Class that contains the logic to run a Monty Hall Simulation.

@@ -1,6 +1,4 @@
-using System;
-
-namespace MontyHallSimulator;
+namespace SimulatorConsole;
 
 /// <summary>
 /// Class that contains global constants.
