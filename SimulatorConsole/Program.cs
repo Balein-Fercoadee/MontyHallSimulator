@@ -8,48 +8,36 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Setup the command line parser.
+        RootCommand rootCommand = new RootCommand("A simulator for the two main strategies in the Monty Hall problem.");
+
+        Option<int> trialOption = new Option<int>("--trials")
+        {
+            Description = $"The number of trials (aka games) to execute in the simulation. The largest value accepted is {Constants.MAX_TRIAL_COUNT}. The default value is {Constants.DEFAULT_TRIAL_COUNT}."
+        };
+        Option<int> threadOption = new Option<int>("--threads")
+        {
+            Description = $"The number of threads the simulater will use. The largest value accepted is half the available number of cores, rounded down. The default value is {Constants.DEFAULT_THREAD_COUNT}."
+        };
+
+        rootCommand.Add(trialOption);
+        rootCommand.Add(threadOption);
+
         int numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
         int numberOfThreads = Constants.DEFAULT_THREAD_COUNT;
 
-        PrintHeader();
-
-        ParseResults results = ArgumentProcessor.Parse(args, numberOfTrials, numberOfThreads);
-
-        if (results.ValidArguments)
+        rootCommand.SetAction(parseResult =>
         {
-            if (results.NumberOfArguments == 0)
-            {
-                PrintHelp();
-                Console.WriteLine();
-            }
-            numberOfTrials = results.NumberOfTrials != null ? results.NumberOfTrials.Value : Constants.DEFAULT_TRIAL_COUNT;
-            numberOfThreads = results.NumberOfThreads!= null ? results.NumberOfThreads.Value : Constants.DEFAULT_THREAD_COUNT;
-        }
-        else
-        {
-            PrintError("Invalid arguments.");
-            PrintHelp();
-            Environment.Exit(1);
-        }
+            numberOfThreads = parseResult.GetValue(threadOption);
+            numberOfTrials = parseResult.GetValue(trialOption);
+            RunSimulation(numberOfTrials, numberOfThreads);
 
-        RunSimulation(numberOfTrials, numberOfThreads);
-    }
+            return 0;
+        });
 
-    /// <summary>
-    /// Prints the simulator's usage to the default console.
-    /// </summary>
-    private static void PrintHelp()
-    {
-        Console.WriteLine();
-        Console.WriteLine("usage: MontyHallSimulator <number of trials> <number of threads>");
-        Console.WriteLine();
-        Console.WriteLine("number of trials -  The number of trials the simulator will run.");
-        Console.WriteLine($"                    The largest value accepted is {Constants.MAX_TRIAL_COUNT}.");
-        Console.WriteLine($"                    The default value is {Constants.DEFAULT_TRIAL_COUNT}.");
-        Console.WriteLine("                    WARNING - Running the max, or near max, number of trials may result in an out-of-memory exception.");
-        Console.WriteLine("number of threads - The number of threads the simulater will use.");
-        Console.WriteLine("                    The largest value accepted is half the available number of cores, rounded down.");
-        Console.WriteLine($"                    The default value is {Constants.DEFAULT_THREAD_COUNT}.");
+        ParseResult parseResult = rootCommand.Parse(args);
+        
+        Environment.Exit(parseResult.Invoke());
     }
 
     private static void PrintHeader()
@@ -78,13 +66,6 @@ class Program
         Console.WriteLine("Switch Doors After Shown Goat Door");
         Console.WriteLine($"  Wins: {playerWinsDueToSwitch,14:N0}; Ratio W/T: {(playerWinsDueToSwitch) / (decimal)numberOfTrials:P5}");
         Console.WriteLine();
-    }
-
-    private static void PrintError(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"ERROR - {message}");
-        Console.ResetColor();
     }
 
     private static void RunSimulation(int numberOfTrials, int numberOfThreads)
