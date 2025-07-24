@@ -1,20 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.Reflection;
+using SimulatorLogic;
 
 namespace SimulatorConsole;
 
 class Program
 {
-    [ThreadStatic]
-    private static Random? __random;
-
-    /// <summary>
-    /// Gets an instance of <c>Random</c>. This property will be unique per thread.
-    /// If this is the first call to the property for the thread, a new instance is created and returned. Otherwise, the thread's existing instance is returned.
-    /// </summary>
-    private static Random Random => __random ?? (__random = new Random((int)((1 + Thread.CurrentThread.ManagedThreadId) * DateTime.UtcNow.Ticks)));
-
     static void Main(string[] args)
     {
         int numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
@@ -31,8 +22,8 @@ class Program
                 PrintHelp();
                 Console.WriteLine();
             }
-            numberOfTrials = results.NumberOfTrials != null ? results.NumberOfTrials.Value : 0;
-            numberOfThreads = results.NumberOfThreads!= null ? results.NumberOfThreads.Value : 0;
+            numberOfTrials = results.NumberOfTrials != null ? results.NumberOfTrials.Value : Constants.DEFAULT_TRIAL_COUNT;
+            numberOfThreads = results.NumberOfThreads!= null ? results.NumberOfThreads.Value : Constants.DEFAULT_THREAD_COUNT;
         }
         else
         {
@@ -73,7 +64,7 @@ class Program
         Console.ResetColor();
     }
 
-    private static void PrintTrailer(DateTime startTime, DateTime endTime, long playerWinsStayingPat, long playerWinsDueToSwitch, int numberOfTrials)
+    private static void PrintTrailer(DateTime startTime, DateTime endTime, long playerWinsStayingPat, long playerWinsDueToSwitch, long numberOfTrials)
     {
         Console.WriteLine();
         Console.WriteLine("Simulation Results");
@@ -94,88 +85,17 @@ class Program
         Console.ResetColor();
     }
 
-    private static void RunSimulation(int numberOfTrials, int numberOfTreads)
+    private static void RunSimulation(int numberOfTrials, int numberOfThreads)
     {
-        if (numberOfTrials == 0)
-            numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
-
-        long playerWinsSwitching = 0;
-        long playerWinsStayingPat = 0;
-
-        ConcurrentBag<int> playerStays = new ConcurrentBag<int>();
-        ConcurrentBag<int> playerSwitches = new ConcurrentBag<int>();
-        
-        string pluralTrials = numberOfTrials > 1 ? "s" : string.Empty;
-        string pluralThreads = numberOfTreads > 1 ? "s" : string.Empty;
 
         Console.WriteLine();
-        Console.Write($"Starting simulation with {numberOfTrials:N0} trial{pluralTrials}, on {numberOfTreads} thread{pluralThreads}... ");
+        Console.Write($"Starting simulation ... ");
 
-        DateTime startTime = DateTime.UtcNow;
-
-        Parallel.For(0, numberOfTrials, new ParallelOptions() { MaxDegreeOfParallelism = numberOfTreads }, i =>
-        {
-            SimulationOutcome outcome = new Simulator().RunSingleSimulation();
-
-            if (outcome.WinWithStay)
-                playerStays.Add(1);
-
-            if (outcome.WinWithSwitch)
-                playerSwitches.Add(1);
-        });
-
-        DateTime endTime = DateTime.UtcNow;
+        MHSimulator simulator = new MHSimulator();
+        MHSimulationOutcome results = simulator.RunSimulation(numberOfTrials, numberOfThreads);
 
         Console.WriteLine("complete.");
 
-        Console.Write("Compiling results... ");
-        playerWinsStayingPat = playerStays.Sum();
-        playerWinsSwitching = playerSwitches.Sum();
-        Console.WriteLine("complete.");
-
-        PrintTrailer(startTime, endTime, playerWinsStayingPat, playerWinsSwitching, numberOfTrials);
-    }
-
-    /// <summary>
-    /// Generate a single simulation of a Monty Hall round.
-    /// </summary>
-    /// <param name="rng">An instance of <c>Random</c>.</param>
-    public static SimulationOutcome RunSingleRound(Random rng)
-    {
-        SimulationOutcome roundOutcome = new SimulationOutcome();
-
-        // Create the 3 doors and initialize with goats
-        List<Prizes> doors = new List<Prizes>() { Prizes.Goat, Prizes.Goat, Prizes.Goat };
-        // Pick a door to put the car behind.
-        int doorWithCar = rng.Next(3);
-        doors[doorWithCar] = Prizes.Car;
-
-        // Have the player chose a door
-        int playerDoorChoice = rng.Next(3);
-
-        int shownDoor;
-        // The host shows a door which has a goat and is not the player's door.
-        do
-        {
-            shownDoor = rng.Next(3);
-        } while (doors[shownDoor] == Prizes.Car | shownDoor == playerDoorChoice);
-
-        // if the car is behind the player's initial door then they win!
-        if (playerDoorChoice == doorWithCar)
-            roundOutcome.WinWithStay = true;
-
-        int newPlayerDoorChoice;
-        // Now have player switch their choice
-        // Make sure they don't chose the shown door or the door they already picked
-        do
-        {
-            newPlayerDoorChoice = rng.Next(3);
-        } while (newPlayerDoorChoice == playerDoorChoice | newPlayerDoorChoice == shownDoor);
-
-        // if the car is behind the player's second door then they win!
-        if (newPlayerDoorChoice == doorWithCar)
-            roundOutcome.WinWithSwitch = true;
-
-        return roundOutcome;
+        PrintTrailer(results.SimulationStartDateTime, results.SimulationEndDateTime, results.TotalWinsWithStay, results.TotalWinsWithSwitch, results.TotalGamesPlayed);
     }
 }
