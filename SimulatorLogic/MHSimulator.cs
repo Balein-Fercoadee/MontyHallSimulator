@@ -17,6 +17,14 @@ public class MHSimulator
     private static Random Random => __random ??= new Random((int)((1 + Environment.CurrentManagedThreadId) * DateTime.UtcNow.Ticks));
 
     /// <summary>
+    /// Runs Monty Hall game simulations with the application defaults.
+    /// </summary>
+    public MHSimulationOutcome RunSimulation()
+    {
+        return RunSimulation(Constants.DEFAULT_TRIAL_COUNT, Constants.DEFAULT_THREAD_COUNT);
+    }
+
+    /// <summary>
     /// Runs Monty Hall game simulations.
     /// </summary>
     /// <param name="numberOfGames">The number of Monty Hall games to run.</param>
@@ -25,8 +33,10 @@ public class MHSimulator
     {
         MHSimulationOutcome results = new MHSimulationOutcome();
 
-        if (numberOfGames == 0)
+        if (numberOfGames <= 0)
             numberOfGames = Constants.DEFAULT_TRIAL_COUNT;
+        if (numberOfThreads <= 0)
+            numberOfThreads = Constants.DEFAULT_THREAD_COUNT;
 
         long playerWinsSwitching = 0;
         long playerWinsStayingPat = 0;
@@ -51,6 +61,13 @@ public class MHSimulator
 
         playerWinsStayingPat = playerStays.Sum();
         playerWinsSwitching = playerSwitches.Sum();
+
+        results.TotalGamesPlayed = numberOfGames;
+        results.TotalThreadsUsed = numberOfThreads;
+        results.TotalWinsWithStay = playerWinsStayingPat;
+        results.TotalWinsWithSwitch = playerWinsSwitching;
+        results.SimulationEndDateTime = endTime;
+        results.SimulationStartDateTime = startTime;
 
         return results;
     }
@@ -153,40 +170,45 @@ public struct MHSimulationOutcome
     /// <summary>
     /// The total number of Monty Hall games that were simulated.
     /// </summary>
-    public int TotalGamesPlayed;
+    public long TotalGamesPlayed;
+
+    /// <summary>
+    /// The total number of threads to run the simulation.
+    /// </summary>
+    public long TotalThreadsUsed;
 
     /// <summary>
     /// The total number of Monty Hall games that were won using the 'Stay' strategy.
     /// </summary>
-    public int TotalWinsWithStay;
+    public long TotalWinsWithStay;
 
     /// <summary>
     /// The total number of Monty Hall games that were won using the 'Switch' strategy.
     /// </summary>
-    public int TotalWinsWithSwitch;
+    public long TotalWinsWithSwitch;
 
     /// <summary>
-    /// The date and time that the Monty Hall simulation was started.
+    /// The date and time that the Monty Hall simulation started.
     /// </summary>
-    public DateTime StartOfSimulationDateTime;
+    public DateTime SimulationStartDateTime;
 
     /// <summary>
-    /// The date and time that the Monty Hall simulation was ended.
+    /// The date and time that the Monty Hall simulation ended.
     /// </summary>
-    public DateTime EndOfSimulationDateTime;
+    public DateTime SimulationEndDateTime;
 
     /// <summary>
     /// The total number of seconds that the Monty Hall simulation ran.
     /// </summary>
-    public readonly double DurationOfSimulationInSeconds
+    public readonly double SimulationDurationInSeconds
     {
-        get { return (EndOfSimulationDateTime - StartOfSimulationDateTime).TotalSeconds; }
+        get { return (SimulationEndDateTime - SimulationStartDateTime).TotalSeconds; }
     }
 
     /// <summary>
     /// The percentag of games won using the 'Stay' strategy.
     /// </summary>
-    public readonly double PercentWinRateWithStay
+    public readonly double WinRatioWithStay
     {
         get { return TotalGamesPlayed > 0 ? ((double)TotalWinsWithStay / TotalGamesPlayed) : 0; }
     }
@@ -194,7 +216,7 @@ public struct MHSimulationOutcome
     /// <summary>
     /// The percentag of games won using the 'Switch' strategy.
     /// </summary>
-    public readonly double PecentWinRateWithSwitch
+    public readonly double WinRatioWithSwitch
     {
         get { return TotalGamesPlayed > 0 ? ((double)TotalWinsWithSwitch / TotalGamesPlayed) : 0; }
     }
