@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.CommandLine;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace SimulatorConsole;
 
 class Program
 {
     [ThreadStatic]
-    private static Random __random;
+    private static Random? __random;
 
     /// <summary>
     /// Gets an instance of <c>Random</c>. This property will be unique per thread.
@@ -35,8 +31,8 @@ class Program
                 PrintHelp();
                 Console.WriteLine();
             }
-            numberOfTrials = results.NumberOfTrials.Value;
-            numberOfThreads = results.NumberOfThreads.Value;
+            numberOfTrials = results.NumberOfTrials != null ? results.NumberOfTrials.Value : 0;
+            numberOfThreads = results.NumberOfThreads!= null ? results.NumberOfThreads.Value : 0;
         }
         else
         {
@@ -67,12 +63,12 @@ class Program
 
     private static void PrintHeader()
     {
-        string version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+        string version = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? string.Empty;
 
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine();
         Console.WriteLine(new string('=', 50));
-        Console.WriteLine($"Monty Hall Simulator v{version}");
+        Console.WriteLine($"Monty Hall Simulator {version}");
         Console.WriteLine(new string('=', 50));
         Console.ResetColor();
     }
