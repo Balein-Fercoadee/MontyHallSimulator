@@ -69,8 +69,10 @@ class Program
         Console.WriteLine();
         Console.WriteLine("Simulation Results");
         Console.WriteLine(new string('=', 50));
-        Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds:F3}s");
+        Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds:F3} seconds");
         Console.WriteLine();
+        Console.WriteLine("Total number of game simulated:");
+        Console.WriteLine($"        {numberOfTrials,14:N0}");
         Console.WriteLine("Stay with First Door Choice");
         Console.WriteLine($"  Wins: {playerWinsStayingPat,14:N0}; Ratio W/T: {(playerWinsStayingPat) / (decimal)numberOfTrials:P5}");
         Console.WriteLine("Switch Doors After Shown Goat Door");
@@ -89,7 +91,7 @@ class Program
     {
 
         Console.WriteLine();
-        Console.Write($"Starting simulation ... ");
+        Console.Write($"Running simulation... ");
 
         MHSimulator simulator = new MHSimulator();
         MHSimulationOutcome results = simulator.RunSimulation(numberOfTrials, numberOfThreads);

@@ -22,6 +22,10 @@ Run the program, take a look at the code and be prepared to have your intuition 
 sudo apt install dotnet-sdk-9.0
 ```
 
+## Optional Software
+
+* VS Code, my personal favorite free IDE  (Windows/MacOS/Linux)
+
 ## Building
 
 ### Using Visual Studio (Windows)
@@ -54,10 +58,22 @@ To supply the number of trials:
 
 `./MontyHallSimulator <numberOfTrials>`
 
-`./MontyHallSimulator 1000000` will execute 1,000,000 trials on one thread.
+The below example will execute 1,000,000 trials on one thread.
+
+```bash
+./MontyHallSimulator 1000000
+```
 
 To supply the number of trials and threads:
 
 `./MontyHallSimulator <numberOfTrials> <numberOfThreads>`
 
-`./MontyHallSimulator 10000000 6` will execute 10,000,000 trials on six threads.
+The below example will execute 1,000,000 trials on 6 threads.
+
+```bash
+./MontyHallSimulator 1000000 6
+```
+
+## The Code
+
+The code is split into Console UI, Logic and Tests. It really makes testing the logic possible.
