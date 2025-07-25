@@ -1,7 +1,8 @@
-using System;
+namespace SimulatorLogic;
 
-namespace MontyHallSimulator;
-
+/// <summary>
+/// Class that contains global constants.
+/// </summary>
 public static class Constants
 {
     /// <summary>
@@ -17,5 +18,5 @@ public static class Constants
     /// <summary>
     /// The maximum number of trials that can be run in one simultation.
     /// </summary>
-    public const int MAX_TRIAL_COUNT = Int32.MaxValue;
+    public const int MAX_TRIAL_COUNT = Int32.MaxValue-1;
 }
