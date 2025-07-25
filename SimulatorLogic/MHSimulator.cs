@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reflection.Metadata;
 
 namespace SimulatorLogic;
 
@@ -37,6 +38,11 @@ public class MHSimulator
             numberOfGames = Constants.DEFAULT_TRIAL_COUNT;
         if (numberOfThreads <= 0)
             numberOfThreads = Constants.DEFAULT_THREAD_COUNT;
+
+        if (numberOfGames > Constants.MAX_TRIAL_COUNT)
+            numberOfGames = Constants.MAX_TRIAL_COUNT;
+        if (numberOfThreads > (Environment.ProcessorCount / 2))
+            numberOfThreads = Environment.ProcessorCount / 2;
 
         long playerWinsSwitching = 0;
         long playerWinsStayingPat = 0;

@@ -13,18 +13,22 @@ class Program
 
         Option<int> trialOption = new Option<int>("--trials")
         {
-            Description = $"The number of trials (aka games) to execute in the simulation. The largest value accepted is {Constants.MAX_TRIAL_COUNT}. The default value is {Constants.DEFAULT_TRIAL_COUNT}."
+            Description = $"The number of trials (aka games) to execute in the simulation. The largest value accepted is {Constants.MAX_TRIAL_COUNT}.",
+            DefaultValueFactory = parseResult => Constants.DEFAULT_TRIAL_COUNT,
+            HelpName = "numberOfTrials"
         };
         Option<int> threadOption = new Option<int>("--threads")
         {
-            Description = $"The number of threads the simulater will use. The largest value accepted is half the available number of cores, rounded down. The default value is {Constants.DEFAULT_THREAD_COUNT}."
+            Description = $"The number of threads the simulater will use. The largest value accepted is half the available number of cores, rounded down.",
+            DefaultValueFactory = parseResult => Constants.DEFAULT_THREAD_COUNT,
+            HelpName = "numberOfThreads"
         };
 
         rootCommand.Add(trialOption);
         rootCommand.Add(threadOption);
 
-        int numberOfTrials = Constants.DEFAULT_TRIAL_COUNT;
-        int numberOfThreads = Constants.DEFAULT_THREAD_COUNT;
+        int numberOfTrials;
+        int numberOfThreads;
 
         rootCommand.SetAction(parseResult =>
         {
@@ -52,13 +56,15 @@ class Program
         Console.ResetColor();
     }
 
-    private static void PrintTrailer(DateTime startTime, DateTime endTime, long playerWinsStayingPat, long playerWinsDueToSwitch, long numberOfTrials)
+    private static void PrintTrailer(DateTime startTime, DateTime endTime, long playerWinsStayingPat, long playerWinsDueToSwitch, long numberOfTrials, long numberOfThreads)
     {
         Console.WriteLine();
         Console.WriteLine("Simulation Results");
         Console.WriteLine(new string('=', 50));
         Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds:F3} seconds");
         Console.WriteLine();
+        Console.WriteLine("Total number of threads used:");
+        Console.WriteLine($"        {numberOfThreads}");
         Console.WriteLine("Total number of game simulated:");
         Console.WriteLine($"        {numberOfTrials,14:N0}");
         Console.WriteLine("Stay with First Door Choice");
@@ -79,6 +85,6 @@ class Program
 
         Console.WriteLine("complete.");
 
-        PrintTrailer(results.SimulationStartDateTime, results.SimulationEndDateTime, results.TotalWinsWithStay, results.TotalWinsWithSwitch, results.TotalGamesPlayed);
+        PrintTrailer(results.SimulationStartDateTime, results.SimulationEndDateTime, results.TotalWinsWithStay, results.TotalWinsWithSwitch, results.TotalGamesPlayed, results.TotalThreadsUsed);
     }
 }
