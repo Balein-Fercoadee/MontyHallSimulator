@@ -62,9 +62,8 @@ class Program
         Console.WriteLine("Simulation Results");
         Console.WriteLine(new string('=', 50));
         Console.WriteLine($"Simulation runtime: {(endTime - startTime).TotalSeconds:F3} seconds");
-        Console.WriteLine();
         Console.WriteLine("Total number of threads used:");
-        Console.WriteLine($"        {numberOfThreads}");
+        Console.WriteLine($"       {numberOfThreads,14:N0}");
         Console.WriteLine("Total number of game simulated:");
         Console.WriteLine($"        {numberOfTrials,14:N0}");
         Console.WriteLine("Stay with First Door Choice");
@@ -78,10 +77,10 @@ class Program
     {
 
         Console.WriteLine();
-        Console.WriteLine($"Running simulation for {numberOfTrials,14:N0} trials... ");
+        Console.WriteLine($"Running simulation for {numberOfTrials,14:N0} trials...");
 
         MHSimulator simulator = new MHSimulator();
-        simulator.SimulationProgress += simulator_SimulationProgress;
+        simulator.SimulationProgress += Simulator_SimulationProgress;
         MHSimulationOutcome results = simulator.RunSimulation(numberOfTrials, numberOfThreads);
 
         Console.WriteLine("Simulation complete.");
@@ -89,8 +88,8 @@ class Program
         PrintTrailer(results.SimulationStartDateTime, results.SimulationEndDateTime, results.TotalWinsWithStay, results.TotalWinsWithSwitch, results.TotalGamesPlayed, results.TotalThreadsUsed);
     }
 
-    private static void simulator_SimulationProgress(object? sender, SimulationProgressEventArgs e)
+    private static void Simulator_SimulationProgress(object? sender, SimulationProgressEventArgs e)
     {
-        Console.WriteLine($"  {e.CurrentNumberOfCompletedTrials,14:N0} completed...");
+        Console.WriteLine($"{e.CurrentNumberOfCompletedTrials,14:N0} completed...");
     }
 }
