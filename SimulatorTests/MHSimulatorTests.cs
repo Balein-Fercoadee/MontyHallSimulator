@@ -57,6 +57,18 @@ public class MHSimulatorTests
     }
 
     [TestMethod]
+    public void MHSimulatorPassedMax()
+    {
+        MHSimulator sim = new MHSimulator();
+        var outcome = sim.RunSimulation(Constants.MAX_TRIAL_COUNT,10);
+
+        Assert.AreEqual(Constants.MAX_TRIAL_COUNT, outcome.TotalGamesPlayed);
+        Assert.AreEqual(10, outcome.TotalThreadsUsed);
+        Assert.AreEqual(0.333, outcome.WinRatioWithStay, 2);
+        Assert.AreEqual(0.663, outcome.WinRatioWithSwitch, 2);
+    }
+
+    [TestMethod]
     public void MHSimulatorUsingDefaults()
     {
         MHSimulator sim = new MHSimulator();

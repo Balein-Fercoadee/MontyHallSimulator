@@ -8,6 +8,11 @@ namespace SimulatorLogic;
 /// </summary>
 public class MHSimulator
 {
+    /// <summary>
+    /// Event that periodically updates the caller of simulation progress.
+    /// </summary>
+    public event EventHandler<SimulationProgressEventArgs>? SimulationProgress;
+
     [ThreadStatic]
     private static Random? __random;
 
@@ -30,7 +35,7 @@ public class MHSimulator
     /// </summary>
     /// <param name="numberOfGames">The number of Monty Hall games to run.</param>
     /// <param name="numberOfThreads">The number of threads to run the simulation on.</param>
-    public MHSimulationOutcome RunSimulation(int numberOfGames, int numberOfThreads)
+    public MHSimulationOutcome RunSimulation(long numberOfGames, int numberOfThreads)
     {
         MHSimulationOutcome results = new MHSimulationOutcome();
 
@@ -41,8 +46,8 @@ public class MHSimulator
 
         if (numberOfGames > Constants.MAX_TRIAL_COUNT)
             numberOfGames = Constants.MAX_TRIAL_COUNT;
-        if (numberOfThreads > (Environment.ProcessorCount / 2))
-            numberOfThreads = Environment.ProcessorCount / 2;
+        if (numberOfThreads > (3 * Environment.ProcessorCount / 4))
+            numberOfThreads = 3 * Environment.ProcessorCount / 4;
 
         long playerWinsSwitching = 0;
         long playerWinsStayingPat = 0;
@@ -51,22 +56,56 @@ public class MHSimulator
         ConcurrentBag<int> playerSwitches = new ConcurrentBag<int>();
 
         DateTime startTime = DateTime.UtcNow;
+        long tempNumberOfGames = numberOfGames;
+        long loopsCompleted = 0;
 
-        Parallel.For(0, numberOfGames, new ParallelOptions() { MaxDegreeOfParallelism = numberOfThreads }, i =>
+        do
         {
-            MHGameOutcome outcome = RunSingleGame(Random);
+            long gamesToExecute = 0;
 
-            if (outcome.WinWithStay)
-                playerStays.Add(1);
+            if (tempNumberOfGames >= Constants.DEFAULT_TRIALS_PER_LOOP)
+            {
+                gamesToExecute = Constants.DEFAULT_TRIALS_PER_LOOP;
+                tempNumberOfGames -= Constants.DEFAULT_TRIALS_PER_LOOP;
+            }
+            else
+            {
+                gamesToExecute = tempNumberOfGames;
+                tempNumberOfGames -= tempNumberOfGames;
+            }
 
-            if (outcome.WinWithSwitch)
-                playerSwitches.Add(1);
-        });
+            Parallel.For(0, gamesToExecute, new ParallelOptions() { MaxDegreeOfParallelism = numberOfThreads }, i =>
+            {
+                MHGameOutcome outcome = RunSingleGame(Random);
+
+                if (outcome.WinWithStay)
+                    playerStays.Add(1);
+
+                if (outcome.WinWithSwitch)
+                    playerSwitches.Add(1);
+            });
+
+            playerWinsStayingPat += playerStays.Sum();
+            playerWinsSwitching += playerSwitches.Sum();
+
+            loopsCompleted += 1;
+            long gamesCompleted = 0;
+
+            if (tempNumberOfGames > 0)
+            {
+                playerStays.Clear();
+                playerSwitches.Clear();
+                gamesCompleted = loopsCompleted * Constants.DEFAULT_TRIALS_PER_LOOP;
+            }
+            else
+            {
+                gamesCompleted = numberOfGames;
+            }
+
+            OnSimulationProgress(new SimulationProgressEventArgs(gamesCompleted, (DateTime.UtcNow - startTime).TotalSeconds));
+        } while (tempNumberOfGames > 0);
 
         DateTime endTime = DateTime.UtcNow;
-
-        playerWinsStayingPat = playerStays.Sum();
-        playerWinsSwitching = playerSwitches.Sum();
 
         results.TotalGamesPlayed = numberOfGames;
         results.TotalThreadsUsed = numberOfThreads;
@@ -115,6 +154,15 @@ public class MHSimulator
             roundOutcome.WinWithSwitch = true;
 
         return roundOutcome;
+    }
+
+    /// <summary>
+    /// Raises the SimulationProgress event.
+    /// </summary>
+    /// <param name="e"></param>
+    protected virtual void OnSimulationProgress(SimulationProgressEventArgs e)
+    {
+        SimulationProgress?.Invoke(this, e);
     }
 }
 
@@ -225,5 +273,40 @@ public struct MHSimulationOutcome
     public readonly double WinRatioWithSwitch
     {
         get { return TotalGamesPlayed > 0 ? ((double)TotalWinsWithSwitch / TotalGamesPlayed) : 0; }
+    }
+}
+
+/// <summary>
+/// Custom event agrs for the SimulationProgress event within MHSimulator.
+/// </summary>
+public class SimulationProgressEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets or sets the number of trials completed at the time the event was raised.
+    /// </summary>
+    public long CurrentNumberOfCompletedTrials { get; set; }
+
+    /// <summary>
+    /// Gets or sets the seconds that have passed since the simulation started.
+    /// </summary>
+    public double CurrentSimulationDurationInSeconds { get; set; }
+
+    /// <summary>
+    /// Default constructor
+    /// </summary>
+    public SimulationProgressEventArgs()
+    {
+
+    }
+
+    /// <summary>
+    /// Constructor that allows the setting of the completed trials and current duration.
+    /// </summary>
+    /// <param name="currentNumberOfCompletedTrials"></param>
+    /// <param name="currentSimulationDurationInSeconds"></param>
+    public SimulationProgressEventArgs(long currentNumberOfCompletedTrials, double currentSimulationDurationInSeconds)
+    {
+        CurrentNumberOfCompletedTrials = currentNumberOfCompletedTrials;
+        CurrentSimulationDurationInSeconds = currentSimulationDurationInSeconds;
     }
 }
