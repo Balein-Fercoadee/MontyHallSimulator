@@ -49,6 +49,10 @@ public class MHSimulator
         if (numberOfThreads > (3 * Environment.ProcessorCount / 4))
             numberOfThreads = 3 * Environment.ProcessorCount / 4;
 
+        // make sure the number of threads is at least 1
+        if (numberOfThreads < 1)
+            numberOfThreads = 1;
+
         long playerWinsSwitching = 0;
         long playerWinsStayingPat = 0;
 
