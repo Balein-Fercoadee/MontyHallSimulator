@@ -9,7 +9,7 @@ class Program
     internal static int Main(string[] args)
     {
         // Setup the command line parser.
-        RootCommand rootCommand = new RootCommand("A simulator for the two main strategies in the Monty Hall problem.");
+        RootCommand rootCommand = new RootCommand("Simulates the Monty Hall problem and compares the stay and switch strategies.");
 
         Option<long> trialOption = new Option<long>("--trials")
         {
@@ -64,12 +64,15 @@ class Program
 
     private static void PrintHeader()
     {
-        string version = "v" + (Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? string.Empty);
+        string consoleVersion = Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? string.Empty;
+        string logicVersion = typeof(MHSimulator).Assembly.GetName().Version?.ToString() ?? string.Empty;
 
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine();
         Console.WriteLine(new string('=', 50));
-        Console.WriteLine($"Monty Hall Simulator {version}");
+        Console.WriteLine("Monty Hall Simulator");
+        Console.WriteLine($"Console version: v{consoleVersion}");
+        Console.WriteLine($"Logic version:   v{logicVersion}");
         Console.WriteLine(new string('=', 50));
         Console.ResetColor();
     }
@@ -93,7 +96,7 @@ class Program
 
     private static void RunSimulation(long numberOfTrials, int numberOfThreads)
     {
-
+        PrintHeader();
         Console.WriteLine();
         Console.WriteLine($"Running simulation for {numberOfTrials,14:N0} trials...");
 
@@ -108,6 +111,6 @@ class Program
 
     private static void Simulator_SimulationProgress(object? sender, SimulationProgressEventArgs e)
     {
-        Console.WriteLine($"{e.CurrentNumberOfCompletedTrials,14:N0} completed...");
+        Console.WriteLine($"{e.CurrentNumberOfCompletedTrials,14:N0} completed, elapsed time: {e.CurrentSimulationDurationInSeconds:F3} s...");
     }
 }
