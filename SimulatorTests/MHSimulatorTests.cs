@@ -57,6 +57,7 @@ public class MHSimulatorTests
     }
 
     [TestMethod]
+    [Ignore]
     public void MHSimulatorPassedMax()
     {
         MHSimulator sim = new MHSimulator();

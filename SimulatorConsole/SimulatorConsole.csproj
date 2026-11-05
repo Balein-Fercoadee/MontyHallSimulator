@@ -24,4 +24,8 @@
     <ProjectReference Include="..\SimulatorLogic\SimulatorLogic.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SimulatorConsoleTests" />
+  </ItemGroup>
+
 </Project>

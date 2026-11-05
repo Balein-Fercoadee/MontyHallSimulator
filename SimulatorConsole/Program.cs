@@ -6,7 +6,7 @@ namespace SimulatorConsole;
 
 class Program
 {
-    static void Main(string[] args)
+    internal static int Main(string[] args)
     {
         // Setup the command line parser.
         RootCommand rootCommand = new RootCommand("A simulator for the two main strategies in the Monty Hall problem.");
@@ -17,12 +17,30 @@ class Program
             DefaultValueFactory = parseResult => Constants.DEFAULT_TRIAL_COUNT,
             HelpName = "numberOfTrials"
         };
+        trialOption.Validators.Add(result =>
+        {
+            long numberOfTrials = result.GetValueOrDefault<long>();
+            if (numberOfTrials <= 0 || numberOfTrials > Constants.MAX_TRIAL_COUNT)
+            {
+                result.AddError($"The number of trials must be between 1 and {Constants.MAX_TRIAL_COUNT}.");
+            }
+        });
+
         Option<int> threadOption = new Option<int>("--threads")
         {
             Description = $"The number of threads the simulater will use. The largest value accepted is three-fourths the available number of cores, rounded down.",
             DefaultValueFactory = parseResult => Constants.DEFAULT_THREAD_COUNT,
             HelpName = "numberOfThreads"
         };
+        int maxThreadCount = 3 * Environment.ProcessorCount / 4;
+        threadOption.Validators.Add(result =>
+        {
+            int numberOfThreads = result.GetValueOrDefault<int>();
+            if (numberOfThreads <= 0 || numberOfThreads > maxThreadCount)
+            {
+                result.AddError($"The number of threads must be between 1 and {maxThreadCount}.");
+            }
+        });
 
         rootCommand.Add(trialOption);
         rootCommand.Add(threadOption);
@@ -41,12 +59,12 @@ class Program
 
         ParseResult parseResult = rootCommand.Parse(args);
 
-        Environment.Exit(parseResult.Invoke());
+        return parseResult.Invoke();
     }
 
     private static void PrintHeader()
     {
-        string version = "v" + Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? string.Empty;
+        string version = "v" + (Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ?? string.Empty);
 
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine();
